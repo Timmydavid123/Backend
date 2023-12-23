@@ -8,11 +8,11 @@ const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
-const extractUserId = require('./middleware/extractUserId')
+const extractUserId = require('./middleware/extractUserId');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const nodemailer = require('nodemailer');
-const Property = require('./models/property');
+const Property = require('./models/property'); // Import the Property model
 
 // Generate a secure random string as the session secret key
 const randomBuffer = crypto.randomBytes(32);
@@ -29,7 +29,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
   .catch((error) => {
     console.error('MongoDB connection error:', error);
   });
-
 
 // Middleware
 app.use(express.json());
@@ -51,7 +50,6 @@ app.use('/api', authRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
 
 // CORS
 app.use((req, res, next) => {
@@ -94,10 +92,10 @@ app.post('/submit-property-form', upload.array('propertyPictures', 5), async (re
     // Send an email to the provided email address
     await sendConfirmationEmail(formData.emailAddress);
 
-    console.log('Form submitted and saved to database:', savedForm);
+    console.log('Form submitted and saved to the database:', savedForm);
     res.json({ message: 'Form submitted successfully!' });
   } catch (error) {
-    console.error('Error saving form data to database:', error);
+    console.error('Error saving form data to the database:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -114,4 +112,3 @@ async function sendConfirmationEmail(emailAddress) {
   // Use nodemailer to send the email
   await transporter.sendMail(mailOptions);
 }
-
