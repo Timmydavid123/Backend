@@ -9,6 +9,10 @@ const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
 const extractUserId = require('./middleware/extractUserId')
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const nodemailer = require('nodemailer');
+const Property = require('./models/property');
 
 // Generate a secure random string as the session secret key
 const randomBuffer = crypto.randomBytes(32);
@@ -47,3 +51,67 @@ app.use('/api', authRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+// CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads/property'); // Adjust the destination folder as needed
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Configure nodemailer with your email service provider details
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'adeleketimileyin11@gmail.com',
+    pass: 'Temiloluwa123',
+  },
+});
+
+// Property form submission route with file upload
+app.post('/submit-property-form', upload.array('propertyPictures', 5), async (req, res) => {
+  const formData = req.body;
+  formData.propertyPictures = req.files.map((file) => file.path); // Save file paths to propertyPictures
+
+  // Save form data to MongoDB
+  try {
+    const savedForm = await Property.create(formData);
+
+    // Send an email to the provided email address
+    await sendConfirmationEmail(formData.emailAddress);
+
+    console.log('Form submitted and saved to database:', savedForm);
+    res.json({ message: 'Form submitted successfully!' });
+  } catch (error) {
+    console.error('Error saving form data to database:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Function to send a confirmation email
+async function sendConfirmationEmail(emailAddress) {
+  const mailOptions = {
+    from: 'adeleketimileyin11@gmail.com',
+    to: emailAddress,
+    subject: 'Property Form Submission Received',
+    text: 'Thank you for submitting the property form. Your submission is being processed for review. We will get back to you shortly.',
+  };
+
+  // Use nodemailer to send the email
+  await transporter.sendMail(mailOptions);
+}
+
