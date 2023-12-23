@@ -10,10 +10,11 @@ const PropertyFormSchema = new mongoose.Schema({
   propertyPictures: [String], // Assuming the file paths will be saved as strings
   propertyLocation: {
     state: String,
-    country: String,
     city: String,
-    address: String,
+    lga: String,
   },
+  propertyAddress: String,
+  propertyCountry: String,
   guarantor1FullName: String,
   guarantor1Email: String,
   guarantor1Phone: String,
