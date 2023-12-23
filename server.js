@@ -32,8 +32,29 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+
 app.use(express.urlencoded({ extended: false }));
+
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+  allowedHeaders: 'Content-Type, Authorization',
+};
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// Use the CORS middleware for all routes
+app.use(cors(corsOptions));
+
+// Add the Cross-Origin-Opener-Policy header here
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  next();
+});
+
 
 // Using helmet middleware for secure headers
 app.use(helmet());
@@ -51,13 +72,6 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// CORS
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000', 'http://localhost:3001');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -75,8 +89,8 @@ const upload = multer({ storage: storage });
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'adeleketimileyin11@gmail.com',
-    pass: 'Temiloluwa123',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
