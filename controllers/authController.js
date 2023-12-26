@@ -44,8 +44,9 @@ passport.use(new GoogleStrategy({
 const authController = {
   Signup: async (req, res) => {
     try {
-      const { fullName, email, password, confirmPassword } = req.body;
+      const { fullName, email, password } = req.body;
   
+
       if (password !== confirmPassword) {
         return res.status(400).json({ message: 'Passwords do not match.' });
       }
