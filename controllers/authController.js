@@ -6,6 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'defaultSecretKey';
 const passport = require('passport'); // Add this line to include passport
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { User } = require('../models/User');
+const uuid = require('uuid'); 
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -210,7 +211,7 @@ forgotPassword: async (req, res) => {
     await user.save();
 
     // Send the password reset email with the token link
-    const resetLink = `http://localhost:3000/change-password?token=${passwordResetToken}`;
+    const resetLink = `http://localhost:3000/Resetpassword?token=${passwordResetToken}`;
     const emailText = `Click on the following link to reset your password: ${resetLink}`;
     await sendEmail(email, 'Password Reset', emailText);
 
@@ -220,6 +221,7 @@ forgotPassword: async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 },
+
 resendOTP: async (req, res) => {
   try {
     const { otp } = req.body;
