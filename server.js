@@ -4,15 +4,12 @@ const crypto = require('crypto');
 const helmet = require('helmet');
 const express = require('express');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
 const extractUserId = require('./middleware/extractUserId');
 const bodyParser = require('body-parser');
-const multer = require('multer');
-const nodemailer = require('nodemailer');
-const Property = require('./models/property'); // Import the Property model
+const authRoutes = require('./routes/auth'); 
 
 // Generate a secure random string as the session secret key
 const randomBuffer = crypto.randomBytes(32);
@@ -71,58 +68,3 @@ app.use('/api', authRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, './uploads/property'); // Adjust the destination folder as needed
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// Configure nodemailer with your email service provider details
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-
-// Property form submission route with file upload
-app.post('/submit-property-form', upload.array('propertyPictures', 5), async (req, res) => {
-  const formData = req.body;
-  formData.propertyPictures = req.files.map((file) => file.path); // Save file paths to propertyPictures
-
-  // Save form data to MongoDB
-  try {
-    const savedForm = await Property.create(formData);
-
-    // Send an email to the provided email address
-    await sendConfirmationEmail(formData.emailAddress);
-
-    console.log('Form submitted and saved to the database:', savedForm);
-    res.json({ message: 'Form submitted successfully!' });
-  } catch (error) {
-    console.error('Error saving form data to the database:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-// Function to send a confirmation email
-async function sendConfirmationEmail(emailAddress) {
-  const mailOptions = {
-    from: 'adeleketimileyin11@gmail.com',
-    to: emailAddress,
-    subject: 'Property Form Submission Received',
-    text: 'Thank you for submitting the property form. Your submission is being processed for review. We will get back to you shortly.',
-  };
-
-  // Use nodemailer to send the email
-  await transporter.sendMail(mailOptions);
-}

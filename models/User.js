@@ -1,41 +1,6 @@
 const mongoose = require("mongoose");
-const authController = require("../controllers/authController");
-
-// Message Model
-const messageSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-  },
-  userId: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const Message = mongoose.model("Message", messageSchema);
-
-// Response Model
-const responseSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true,
-  },
-  userId: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const Response = mongoose.model("Response", responseSchema);
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // User Model
 const userSchema = new mongoose.Schema({
@@ -67,6 +32,29 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// Hash the password before saving to the database
+userSchema.pre('save', async function (next) {
+  const user = this;
+  if (user.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+  }
+  next();
+});
+
+// Method to compare the entered password with the stored hashed password
+userSchema.methods.comparePassword = async function (password) {
+  const user = this;
+  return await bcrypt.compare(password, user.password);
+};
+
+// Method to generate an authentication token (JWT)
+userSchema.methods.generateAuthToken = function () {
+  const user = this;
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  return token;
+};
+
 const User = mongoose.model("User", userSchema);
 
-module.exports = { User, Message, Response };
+module.exports = { User };
