@@ -44,7 +44,7 @@ passport.use(new GoogleStrategy({
 const authController = {
   Signup: async (req, res) => {
     try {
-      const { fullName, email, password } = req.body;
+      const { fullName, email, password, confirmPassword } = req.body;
   
 
       if (password !== confirmPassword) {
