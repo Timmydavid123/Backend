@@ -44,7 +44,11 @@ passport.use(new GoogleStrategy({
 const authController = {
   Signup: async (req, res) => {
     try {
-      const { fullName, email, password, confirmPassword } = req.body;
+      const { fullName, email, password, confirmPassword, agreed } = req.body;
+  
+      if (!fullName || !email || !password || !confirmPassword || agreed === undefined) {
+        return res.status(400).json({ message: 'All fields are required.' });
+      }
   
       if (password !== confirmPassword) {
         return res.status(400).json({ message: 'Passwords do not match.' });
@@ -59,6 +63,7 @@ const authController = {
         fullName,
         email,
         password,
+        agreed,
       });
   
       // Generate a new 4-digit OTP
@@ -80,7 +85,7 @@ const authController = {
       res.status(500).json({ message: 'Internal Server Error during user signup', error: error.message });
     }
   },
-
+  
   Login: async (req, res) => {
     try {
       const { email, password } = req.body;
