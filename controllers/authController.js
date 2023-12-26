@@ -79,7 +79,7 @@ const authController = {
       res.status(201).json({ message: 'User signup successful. Email verification OTP sent.' });
     } catch (error) {
       console.error('Error during user signup:', error);
-      res.status(500).json({ message: 'Internal Server Error during user signup', error: error.message });
+      res.status(500)``.json({ message: 'Internal Server Error during user signup', error: error.message });
     }
   },
   Login: async (req, res) => {
