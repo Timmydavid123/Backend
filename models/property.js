@@ -1,31 +1,36 @@
-// models/property.js
+// models/Property.js
 const mongoose = require('mongoose');
 
-const PropertyFormSchema = new mongoose.Schema({
-  fullName: String,
-  emailAddress: String,
-  phoneNumber: String,
-  propertyType: String,
-  propertyAmount: String,
-  propertyPictures: [String], // Assuming the file paths will be saved as strings
+const propertySchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  emailAddress: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  propertyType: { type: String, required: true },
+  propertyAmount: { type: String, required: true },
+  propertyPictures: [{ type: String }], // Assuming you store image URLs
   propertyLocation: {
-    state: String,
-    city: String,
-    lga: String,
+    state: { type: String, required: true },
+    city: { type: String, required: true },
+    lga: { type: String, required: true },
+    address: { type: String, required: true },
   },
-  propertyAddress: String,
-  propertyCountry: String,
-  guarantor1FullName: String,
-  guarantor1Email: String,
-  guarantor1Phone: String,
-  guarantor1Address: String,
-  guarantor2FullName: String,
-  guarantor2Email: String,
-  guarantor2Phone: String,
-  guarantor2Address: String,
-  timestamp: { type: Date, default: Date.now },
+  propertyCountry: { type: String, required: true },
+  guarantor1FullName: { type: String, required: true },
+  guarantor1Email: { type: String, required: true },
+  guarantor1Phone: { type: String, required: true },
+  guarantor1Address: { type: String, required: true },
+  guarantor2FullName: { type: String, required: true },
+  guarantor2Email: { type: String, required: true },
+  guarantor2Phone: { type: String, required: true },
+  guarantor2Address: { type: String, required: true },
+  propertyOwnerSignature: { type: String, required: true },
+  guarantor1Signature: { type: String, required: true },
+  guarantor2Signature: { type: String, required: true },
+  propertyOwnerThumb: { type: String, required: true },
+  guarantor1Thumb: { type: String, required: true },
+  guarantor2Thumb: { type: String, required: true },
 });
 
-const Property = mongoose.model('Property', PropertyFormSchema);
+const Property = mongoose.model('Property', propertySchema);
 
-module.exports = PropertyFormSchema;
+module.exports = Property;
