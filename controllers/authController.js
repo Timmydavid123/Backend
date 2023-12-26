@@ -45,43 +45,42 @@ const authController = {
   Signup: async (req, res) => {
     try {
       const { fullName, email, password, confirmPassword } = req.body;
-
+  
       if (password !== confirmPassword) {
         return res.status(400).json({ message: 'Passwords do not match.' });
       }
-
+  
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists with this email.' });
       }
-
+  
       const newUser = await User.create({
         fullName,
         email,
         password,
       });
-
+  
       // Generate a new 4-digit OTP
       const newOTP = otpGenerator.generate(4, { upperCase: false, specialChars: false });
-
+  
       newUser.emailVerificationOTP = newOTP;
       await newUser.save();
-
+  
       // Send the OTP to the user's email
       const emailText = `Your OTP for email verification is: ${newOTP}`;
       await sendEmail(email, 'Email Verification OTP', emailText);
-
+  
       // Set a cookie in the response
       const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1d' });
       res.cookie('token', token, { httpOnly: true, maxAge: 86400000 }); // Max age is set to 1 day in milliseconds
-
+  
       res.status(201).json({ message: 'User signup successful. Email verification OTP sent.' });
     } catch (error) {
       console.error('Error during user signup:', error);
-      res.status(500).json({ message: 'Internal Server Error during user signup' });
+      res.status(500).json({ message: 'Internal Server Error during user signup', error: error.message });
     }
   },
-
   Login: async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -159,7 +158,7 @@ const authController = {
       res.status(500).json({ message: 'Internal Server Error during logout' });
     }
   },
-  
+
   verifyEmail: async (req, res) => {
     try {
       const userId = req.userId; // Extracted from the JWT token using extractUserId middleware
