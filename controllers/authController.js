@@ -55,27 +55,35 @@ const authController = {
       console.log("Received request body:", req.body);
       const email = req.body.email;
       const password = req.body.password;
+      const confirmPassword = req.body.confirmPassword;  // Added line
       const fullName = req.body.fullName;
-
+  
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res
           .status(400)
-          .json({ message: "Email already exist." });
+          .json({ message: "Email already exists." });
       }
-
+  
+      // Check if the passwords match
+      if (password !== confirmPassword) {
+        return res
+          .status(400)
+          .json({ message: "Password and Confirm Password must match." });
+      }
+  
       // Check if the password is provided
       if (!password) {
         console.log("Password is missing!");
         return res.status(400).json({ message: "Password is required." });
       }
-
+  
       // Hash the password
       console.log("Password before hashing:", password);
       const hashedPassword = await bcrypt.hash(password, 10);
       console.log("Password after hashing:", hashedPassword);
-
+  
       const newUser = await User.create({
         email,
         password: hashedPassword,
@@ -86,13 +94,13 @@ const authController = {
         }),
         fullName,
       });
-
+  
       await sendEmail(
         email,
         "Email Verification OTP",
         `Your OTP is: ${newUser.emailVerificationOTP}`
       );
-
+  
       res.status(201).json({
         message: "Signup successful. Check your email for verification.",
       });
@@ -101,6 +109,7 @@ const authController = {
       res.status(500).json({ message: "Internal Server Error during signup" });
     }
   },
+
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
