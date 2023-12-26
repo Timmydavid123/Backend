@@ -165,39 +165,30 @@ const authController = {
   },
 
   verifyEmail: async (req, res) => {
+    const {  otp } = req.body;
+  
     try {
-      const userId = req.userId; // Extracted from the JWT token using extractUserId middleware
-      console.log('User ID:', userId);
-
-      // Find the user by ID
-      const user = await User.findById(userId);
+      // Retrieve the user from the database
+      const user = await User.findOne({ emailVerificationOTP: otp });
+  
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(404).json({ message: 'User not found or invalid OTP' });
       }
-
-      // Check if the user is already verified
-      if (user.isVerified) {
-        return res.status(400).json({ message: 'Email is already verified' });
-      }
-
-      // Check if the provided OTP matches the stored OTP
-      const { otp } = req.body;
-      if (otp === user.emailVerificationOTP) {
-        // Mark the user as verified
+  
+      // Retrieve the stored OTP from the user document in the database
+      const storedEmailVerificationOTP = user.emailVerificationOTP;
+  
+        // Update the user's email verification status in the database
         user.isVerified = true;
-        // Clear the stored OTP
-        user.emailVerificationOTP = undefined;
         await user.save();
 
-        res.json({ message: 'Email verification successful' });
-      } else {
-        return res.status(400).json({ message: 'Invalid OTP' });
+        res.status(200).json({ message: 'Email verified successfully.' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
       }
-    } catch (error) {
-      console.error('Error during email verification:', error);
-      res.status(500).json({ message: 'Internal Server Error during email verification' });
-    }
-  },
+    },
+
 // Route for user forgotPassword
 forgotPassword: async (req, res) => {
   try {
