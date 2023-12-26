@@ -222,27 +222,25 @@ forgotPassword: async (req, res) => {
 },
 resendOTP: async (req, res) => {
   try {
-    const userId = req.userId; // Extracted from the JWT token using extractUserId middleware
-    console.log('User ID:', userId);
+    const { otp } = req.body;
 
-    // Find the user by ID
-    const user = await User.findById(userId);
+    // Find the user by OTP
+    const user = await User.findOne({ emailVerificationOTP: otp });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'User not found or invalid OTP' });
     }
 
     // Generate a new 4-digit OTP
-    const newOTP = Math.floor(1000 + Math.random() * 9000).toString();
+    const newOTP = otpGenerator.generate(4, { upperCase: false, specialChars: false });
 
-    // Save the new OTP in the user document
+    // Update the user's OTP in the database
     user.emailVerificationOTP = newOTP;
     await user.save();
 
-    // Send the new OTP to the user's email
-    const emailText = `Your new OTP for email verification is: ${newOTP}`;
-    await sendEmail(user.email, 'Email Verification OTP', emailText);
+    // Send a new OTP to the user's email without including the OTP in the email body
+    await sendEmail(user.email, 'Email Verification OTP', 'A new OTP has been sent to your email.');
 
-    res.json({ message: 'New OTP sent successfully' });
+    res.status(200).json({ message: 'New OTP sent successfully.' });
   } catch (error) {
     console.error('Error during OTP resend:', error);
     res.status(500).json({ message: 'Internal Server Error during OTP resend' });
