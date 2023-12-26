@@ -10,6 +10,7 @@ const session = require('express-session');
 const extractUserId = require('./middleware/extractUserId');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth'); 
+const cookieParser = require('cookie-parser');
 
 // Generate a secure random string as the session secret key
 const randomBuffer = crypto.randomBytes(32);
@@ -29,7 +30,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 
 // Middleware
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
 const corsOptions = {

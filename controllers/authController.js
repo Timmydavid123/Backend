@@ -23,65 +23,57 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL,
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    // Check if the user already exists in your database by their Google ID
     const existingUser = await User.findOne({ googleId: profile.id });
 
     if (existingUser) {
-      // If the user exists, return the user
       return done(null, existingUser);
     }
 
-    // If the user doesn't exist, create a new user in your database
     const newUser = await User.create({
       googleId: profile.id,
       email: profile.emails[0].value,
     });
 
-    // Return the newly created user
     return done(null, newUser);
   } catch (error) {
-    // Handle any errors that occur during the process
     return done(error, null);
   }
 }));
+
 
 const authController = {
   Signup: async (req, res) => {
     try {
       const { fullName, email, password, confirmPassword } = req.body;
 
-      // Check if the passwords match
       if (password !== confirmPassword) {
         return res.status(400).json({ message: 'Passwords do not match.' });
       }
 
-      // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists with this email.' });
       }
 
-      // Create a new user
       const newUser = await User.create({
         fullName,
         email,
         password,
-        // Add other user-specific fields as needed
       });
-
-      // Optionally, generate a token for the newly signed up user
-      const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1d' });
 
       // Generate a new 4-digit OTP
       const newOTP = otpGenerator.generate(4, { upperCase: false, specialChars: false });
 
-      // Save the OTP in the user document
       newUser.emailVerificationOTP = newOTP;
       await newUser.save();
 
       // Send the OTP to the user's email
       const emailText = `Your OTP for email verification is: ${newOTP}`;
       await sendEmail(email, 'Email Verification OTP', emailText);
+
+      // Set a cookie in the response
+      const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '1d' });
+      res.cookie('token', token, { httpOnly: true, maxAge: 86400000 }); // Max age is set to 1 day in milliseconds
 
       res.status(201).json({ message: 'User signup successful. Email verification OTP sent.' });
     } catch (error) {
@@ -158,9 +150,16 @@ const authController = {
   },
 
   logout: (req, res) => {
-    // ... (existing code)
+    try {
+      req.logout(); // Assuming you're using passport
+      res.clearCookie('token'); // Clear the token cookie
+      res.json({ message: 'Logout successful' });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      res.status(500).json({ message: 'Internal Server Error during logout' });
+    }
   },
-
+  
   verifyEmail: async (req, res) => {
     try {
       const userId = req.userId; // Extracted from the JWT token using extractUserId middleware

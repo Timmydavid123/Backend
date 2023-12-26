@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const extractUserId = (req, res, next) => {
   try {
-    const token = req.header('x-auth-token');
+    const token = req.cookies.token;
 
     if (!token) {
       return res.status(401).json({ message: 'Authorization denied. Token not found.' });
