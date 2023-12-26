@@ -2,7 +2,7 @@ const sendEmail = require('../utils/sendEmail');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'defaultSecretKey'; 
 const passport = require('passport'); // Add this line to include passport
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { User } = require('../models/User');
@@ -85,7 +85,7 @@ const authController = {
       res.status(500).json({ message: 'Internal Server Error during user signup', error: error.message });
     }
   },
-  
+
   Login: async (req, res) => {
     try {
       const { email, password } = req.body;
