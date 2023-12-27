@@ -4,6 +4,7 @@ const passport = require('passport');
 const extractUserId = require('../middleware/extractUserId');
 const checkTokenExpiration = require('../middleware/checkTokenExpiration');
 const propertyController = require('../controllers/property');
+const Identification = require('../models/identification');
 
 
 const router = express.Router();
@@ -37,5 +38,38 @@ router.post('/submit-property-form', propertyController.submitPropertyForm);
 // Apply the checkTokenExpiration middleware to every route
 router.use(checkTokenExpiration);
 
+// Handle identification submission
+router.post('/submit-identification', async (req, res) => {
+  try {
+    const { propertyOwner, guarantor1, guarantor2 } = req.body;
+
+    // Save identification data to the database using Mongoose model
+    const propertyOwnerData = new Identification({
+      role: 'Property Owner',
+      idCardImage: propertyOwner.idCardImage,
+      faceImage: propertyOwner.faceImage,
+    });
+    await propertyOwnerData.save();
+
+    const guarantor1Data = new Identification({
+      role: 'Guarantor 1',
+      idCardImage: guarantor1.idCardImage,
+      faceImage: guarantor1.faceImage,
+    });
+    await guarantor1Data.save();
+
+    const guarantor2Data = new Identification({
+      role: 'Guarantor 2',
+      idCardImage: guarantor2.idCardImage,
+      faceImage: guarantor2.faceImage,
+    });
+    await guarantor2Data.save();
+
+    res.status(200).json({ message: 'Identification details submitted successfully!' });
+  } catch (error) {
+    console.error('Error handling identification submission:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;
