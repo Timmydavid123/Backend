@@ -28,6 +28,11 @@ const propertySchema = new mongoose.Schema({
   propertyOwnerThumb: { type: String, required: true },
   guarantor1Thumb: { type: String, required: true },
   guarantor2Thumb: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'disapproved'],
+    default: 'pending',
+  },
 });
 
 const Property = mongoose.model('Property', propertySchema);

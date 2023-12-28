@@ -68,6 +68,36 @@ router.post('/submit-property-form', upload.array('propertyPictures'), async (re
   }
 });
 
+// Inside your backend routes
+router.patch('/admin/approve-property/:propertyId', async (req, res) => {
+  try {
+    const propertyId = req.params.propertyId;
+
+    // Assuming 'approved' or 'disapproved' is sent in the request body
+    const newStatus = req.body.status;
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      propertyId,
+      { $set: { status: newStatus } },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, data: updatedProperty });
+  } catch (error) {
+    console.error('Error updating property status:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+});
+router.get('/properties/approved', async (req, res) => {
+  try {
+    const approvedProperties = await Property.find({ status: 'approved' });
+    res.status(200).json(approvedProperties);
+  } catch (error) {
+    console.error('Error fetching approved properties:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Apply the checkTokenExpiration middleware to every route
 router.use(checkTokenExpiration);
 
@@ -104,5 +134,39 @@ router.post('/submit-identification', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+  // Endpoint for Fetching Pending Properties (get-pending-properties):
+  router.get('/get-pending-properties', (req, res) => {
+    try {
+      // Filter properties to include only pending (not yet approved) ones
+      const pendingProperties = properties.filter(property => property.status === 'pending');
+      res.status(200).json(pendingProperties);
+    } catch (error) {
+      console.error('Error fetching pending properties:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  // Endpoint for Approving a Property (approve-property/:id):
+  router.patch('/approve-property/:id', (req, res) => {
+    try {
+      const propertyId = req.params.id;
+      
+      // Find the index of the property with the given ID
+      const propertyIndex = properties.findIndex(property => property.id === propertyId);
+  
+      if (propertyIndex !== -1) {
+        // Update the property status to 'approved'
+        properties[propertyIndex].status = 'approved';
+        res.status(200).json({ message: 'Property approved successfully' });
+      } else {
+        // Property not found
+        res.status(404).json({ message: 'Property not found' });
+      }
+    } catch (error) {
+      console.error('Error approving property:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 
 module.exports = router;
