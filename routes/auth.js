@@ -3,7 +3,7 @@ const authController = require('../controllers/authController');
 const passport = require('passport');
 const extractUserId = require('../middleware/extractUserId');
 const checkTokenExpiration = require('../middleware/checkTokenExpiration');
-const propertyController = require('../controllers/propertyController');
+const submitPropertyForm = require('../controllers/propertyController');
 const Identification = require('../models/identification');
 
 
@@ -33,7 +33,7 @@ router.get('/auth/google/callback',
   }
 );
 
-router.post('/submit-property-form', propertyController.submitPropertyForm);
+router.post('/submit-property-form',extractUserId, submitPropertyForm.submitPropertyForm);
 
 // Apply the checkTokenExpiration middleware to every route
 router.use(checkTokenExpiration);
