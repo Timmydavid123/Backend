@@ -3,8 +3,8 @@ const authController = require('../controllers/authController');
 const passport = require('passport');
 const extractUserId = require('../middleware/extractUserId');
 const checkTokenExpiration = require('../middleware/checkTokenExpiration');
-const submitPropertyForm = require('../controllers/propertyController');
 const Identification = require('../models/identification');
+const Property = require('../models/property');
 
 
 const router = express.Router();
@@ -33,7 +33,26 @@ router.get('/auth/google/callback',
   }
 );
 
-router.post('/submit-property-form',extractUserId, submitPropertyForm.submitPropertyForm);
+router.post('/submit-property-form', async (req, res) => {
+  try {
+    // Assuming req.body contains the submitted form data
+    const propertyData = req.body;
+
+    // Create an instance of the Property model
+    const property = new Property(propertyData);
+
+    // Validate the data against the Mongoose schema
+    await property.validate();
+
+    // Save the property data if validation passes
+    const savedProperty = await property.save();
+
+    res.status(200).json({ success: true, data: savedProperty });
+  } catch (error) {
+    console.error('Error submitting property form:', error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
 
 // Apply the checkTokenExpiration middleware to every route
 router.use(checkTokenExpiration);
