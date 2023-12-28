@@ -1,4 +1,3 @@
-// controllers/property.js
 const Property = require('../models/property'); // Check the correct path to your model
 
 const submitPropertyForm = async (req, res) => {
