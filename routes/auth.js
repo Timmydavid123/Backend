@@ -4,11 +4,12 @@ const passport = require('passport');
 const extractUserId = require('../middleware/extractUserId');
 const checkTokenExpiration = require('../middleware/checkTokenExpiration');
 const Identification = require('../models/identification');
+const multer = require('multer');
 const Property = require('../models/property');
 
 
 const router = express.Router();
-
+const upload = multer();
 
 router.post('/signup', authController.Signup);
 router.post('/login', authController.Login);
@@ -33,12 +34,20 @@ router.get('/auth/google/callback',
   }
 );
 
-router.post('/submit-property-form', async (req, res) => {
+router.post('/submit-property-form', upload.array('propertyPictures'), async (req, res) => {
   try {
     const propertyData = req.body;
 
-    // Handle propertyPictures
-    propertyData.propertyPictures = propertyData.propertyPictures.map((url) => url.toString());
+    // Assuming propertyPictures is an array of files
+    const propertyPictures = req.files.map((file) => ({
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: file.buffer, // You may want to store the buffer or save it to a storage service
+    }));
+
+    // Update propertyData with the processed propertyPictures
+    propertyData.propertyPictures = propertyPictures;
 
     // Handle signatures
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
