@@ -35,16 +35,21 @@ router.get('/auth/google/callback',
 
 router.post('/submit-property-form', async (req, res) => {
   try {
-    // Assuming req.body contains the submitted form data
     const propertyData = req.body;
+
+    // Handle propertyPictures
+    propertyData.propertyPictures = propertyData.propertyPictures.map((url) => url.toString());
+
+    // Handle signatures
+    propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
+    propertyData.guarantor1Signature = propertyData.guarantor1Signature.toString();
+    propertyData.guarantor2Signature = propertyData.guarantor2Signature.toString();
 
     // Create an instance of the Property model
     const property = new Property(propertyData);
 
-    // Validate the data against the Mongoose schema
+    // Validate and save the property data
     await property.validate();
-
-    // Save the property data if validation passes
     const savedProperty = await property.save();
 
     res.status(200).json({ success: true, data: savedProperty });
