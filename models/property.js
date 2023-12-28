@@ -25,9 +25,6 @@ const propertySchema = new mongoose.Schema({
   propertyOwnerSignature: { type: String, required: true },
   guarantor1Signature: { type: String, required: true },
   guarantor2Signature: { type: String, required: true },
-  propertyOwnerThumb: { type: String, required: true },
-  guarantor1Thumb: { type: String, required: true },
-  guarantor2Thumb: { type: String, required: true },
   status: {
     type: String,
     enum: ['pending', 'approved', 'disapproved'],
