@@ -6,10 +6,25 @@ const checkTokenExpiration = require('../middleware/checkTokenExpiration');
 const Identification = require('../models/identification');
 const multer = require('multer');
 const Property = require('../models/property');
+const fs = require('fs');
+
 
 
 const router = express.Router();
-const upload = multer();
+
+// Set up the local storage using Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, 'uploads'); // Define your upload path
+    fs.mkdirSync(uploadPath, { recursive: true }); // Create the directory if it doesn't exist
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now().toString() + '-' + file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 router.post('/signup', authController.Signup);
 router.post('/login', authController.Login);
@@ -38,16 +53,17 @@ router.post('/submit-property-form', upload.array('propertyPictures'), async (re
   try {
     const propertyData = req.body;
 
-    // Assuming propertyPictures is an array of files
+    // Instead of storing the buffer in the database, store the file paths locally
     const propertyPictures = req.files.map((file) => ({
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      buffer: file.buffer, // You may want to store the buffer or save it to a storage service
+      path: file.path, // Local file path
     }));
 
     // Update propertyData with the processed propertyPictures
     propertyData.propertyPictures = propertyPictures;
+
 
     // Handle signatures
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
