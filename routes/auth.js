@@ -7,20 +7,20 @@ const Identification = require('../models/identification');
 const multer = require('multer');
 const Property = require('../models/property');
 const fs = require('fs');
+const path = require('path');
 
 
 
 const router = express.Router();
 
-// Set up the local storage using Multer
+// Set up storage for Multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, 'uploads'); // Define your upload path
-    fs.mkdirSync(uploadPath, { recursive: true }); // Create the directory if it doesn't exist
-    cb(null, uploadPath);
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Adjust the destination folder as needed
   },
-  filename: (req, file, cb) => {
-    cb(null, Date.now().toString() + '-' + file.originalname);
+  filename: function (req, file, cb) {
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueFilename);
   },
 });
 
@@ -53,17 +53,17 @@ router.post('/submit-property-form', upload.array('propertyPictures'), async (re
   try {
     const propertyData = req.body;
 
-    // Instead of storing the buffer in the database, store the file paths locally
-    const propertyPictures = req.files.map((file) => ({
-      originalname: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
-      path: file.path, // Local file path
-    }));
-
-    // Update propertyData with the processed propertyPictures
-    propertyData.propertyPictures = propertyPictures;
-
+   // Instead of storing the buffer in the database, store only the file paths locally
+   const propertyPicturePaths = req.files.map((file) => {
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    const filePath = `./uploads/${uniqueFilename}`;
+    
+    // Move the file to a local directory
+    fs.renameSync(file.path, filePath);
+    
+    // Return the local file path
+    return filePath;
+  });
 
     // Handle signatures
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();

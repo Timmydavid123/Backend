@@ -6,7 +6,7 @@ const propertySchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   propertyType: { type: String, required: true },
   propertyAmount: { type: String, required: true },
-  propertyPictures: [{ type: String }], // Assuming you store image URLs
+  propertyPictures: [{type: String}], // Array of strings representing file paths
   propertyLocation: {
     state: { type: String, required: true },
     city: { type: String, required: true },
