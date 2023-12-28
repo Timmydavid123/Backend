@@ -8,11 +8,11 @@ const propertySchema = new mongoose.Schema({
   propertyAmount: { type: String, required: true },
   propertyPictures: [{type: String}], // Array of strings representing file paths
   propertyLocation: {
-    state: { type: String, required: true },
-    city: { type: String, required: true },
-    lga: { type: String, required: true },
+    state: { type: String},
+    city: { type: String},
+    lga: { type: String},
   },
-  propertyaddress: { type: String, required: true },
+  propertyaddress: { type: String},
   propertyCountry: { type: String, required: true },
   guarantor1FullName: { type: String, required: true },
   guarantor1Email: { type: String, required: true },
