@@ -49,21 +49,24 @@ router.get('/auth/google/callback',
   }
 );
 
-router.post('/submit-property-form', upload.array('propertyPictures'), async (req, res) => {
+router.post('/submit-property-form', upload.array('propertyPictures', 5), async (req, res) => {
   try {
     const propertyData = req.body;
 
-   // Instead of storing the buffer in the database, store only the file paths locally
-   const propertyPicturePaths = req.files.map((file) => {
-    const uniqueFilename = `${Date.now()}-${file.originalname}`;
-    const filePath = `./uploads/${uniqueFilename}`;
-    
-    // Move the file to a local directory
-    fs.renameSync(file.path, filePath);
-    
-    // Return the local file path
-    return filePath;
-  });
+    // Instead of storing the buffer in the database, store only the file paths locally
+    const propertyPicturePaths = req.files.map((file) => {
+      const uniqueFilename = `${Date.now()}-${file.originalname}`;
+      const filePath = `./uploads/${uniqueFilename}`;
+
+      // Move the file to a local directory
+      fs.renameSync(file.path, filePath);
+
+      // Return the local file path
+      return filePath;
+    });
+
+    // Update propertyData with the processed propertyPicturePaths
+    propertyData.propertyPictures = propertyPicturePaths;
 
     // Handle signatures
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
