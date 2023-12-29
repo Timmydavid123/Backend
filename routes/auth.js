@@ -154,17 +154,13 @@ router.post('/submit-identification', async (req, res) => {
   }
 });
 
-router.get('/get-pending-properties', async (req, res) => {
+router.get('/get-all-properties', (req, res) => {
   try {
-    console.log('Fetching pending properties...');
-    
-    // Add a console log to log the properties obtained from the database
-    const pendingProperties = properties.filter(property => property.status === 'pending');
-    console.log('Pending Properties:', pendingProperties);
-
-    res.status(200).json(pendingProperties);
+    // Fetch all properties from the database
+    const allProperties = properties; // Replace with your actual logic to fetch all properties
+    res.status(200).json(allProperties);
   } catch (error) {
-    console.error('Error fetching pending properties:', error);
+    console.error('Error fetching properties:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
