@@ -154,17 +154,20 @@ router.post('/submit-identification', async (req, res) => {
   }
 });
 
-  // Endpoint for Fetching Pending Properties (get-pending-properties):
-  router.get('/get-pending-properties', (req, res) => {
-    try {
-      // Filter properties to include only pending (not yet approved) ones
-      const pendingProperties = properties.filter(property => property.status === 'pending');
-      res.status(200).json(pendingProperties);
-    } catch (error) {
-      console.error('Error fetching pending properties:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+router.get('/get-pending-properties', async (req, res) => {
+  try {
+    console.log('Fetching pending properties...');
+    
+    // Add a console log to log the properties obtained from the database
+    const pendingProperties = properties.filter(property => property.status === 'pending');
+    console.log('Pending Properties:', pendingProperties);
+
+    res.status(200).json(pendingProperties);
+  } catch (error) {
+    console.error('Error fetching pending properties:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
   
   // Endpoint for Approving a Property (approve-property/:id):
   router.patch('/approve-property/:id', (req, res) => {
