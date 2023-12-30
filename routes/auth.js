@@ -49,9 +49,15 @@ router.get('/auth/google/callback',
   }
 );
 
-router.post('/submit-property-form', upload.array('propertyPictures', 5), async (req, res) => {
+// Route to submit a property form with pictures and signature files
+router.post('/submit-property-form', upload.array('propertyPictures', 4), async (req, res) => {
   try {
     const propertyData = req.body;
+
+    // Check the number of uploaded pictures
+    if (req.files.length < 3 || req.files.length > 4) {
+      throw new Error('Please upload between 3 and 4 pictures.');
+    }
 
     // Instead of storing the buffer in the database, store only the file paths locally
     const propertyPicturePaths = req.files.map((file) => {
@@ -114,6 +120,19 @@ router.get('/properties/approved', async (req, res) => {
   } catch (error) {
     console.error('Error fetching approved properties:', error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+// Route to get a list of properties
+router.get('/properties', async (req, res) => {
+  try {
+    // Fetch all properties from the database
+    const properties = await Property.find();
+
+    // Respond with the list of properties
+    res.status(200).json({ success: true, data: properties });
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 });
 
