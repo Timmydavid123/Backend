@@ -55,16 +55,6 @@ router.post('/submit-property-form', upload.array('propertyPictures', 4), async 
   try {
     const propertyData = req.body;
 
-    // Check if propertyPictures are provided
-    if (!req.files || Object.keys(req.files).length === 0) {
-      throw new Error('Please upload between 3 and 4 pictures.');
-    }
-
-    // Check the number of uploaded pictures
-    if (Object.keys(req.files).length < 3 || Object.keys(req.files).length > 4) {
-      throw new Error('Please upload between 3 and 4 pictures.');
-    }
-
     // Instead of storing the buffer in the database, store only the file paths locally
     const propertyPicturePaths = req.files.map((file) => {
       const uniqueFilename = `${Date.now()}-${file.originalname}`;
