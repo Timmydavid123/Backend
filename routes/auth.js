@@ -49,36 +49,25 @@ router.get('/auth/google/callback',
     res.redirect('/');
   }
 );
-
-// Route to submit a property form with pictures and signature files
 router.post('/submit-property-form', upload.array('propertyPictures', 4), async (req, res) => {
   try {
     const propertyData = req.body;
 
-    // Instead of storing the buffer in the database, store only the file paths locally
     const propertyPicturePaths = req.files.map((file) => {
-      const uniqueFilename = `${Date.now()}-${file.originalname}`;
+      const uniqueFilename = `${Date.now()}_${file.originalname}`;
       const filePath = `./uploads/${uniqueFilename}`;
-
-      // Move the file to a local directory
       fs.renameSync(file.path, filePath);
-
-      // Return the local file path
       return filePath;
     });
 
-    // Update propertyData with the processed propertyPicturePaths
     propertyData.propertyPictures = propertyPicturePaths;
 
-    // Handle signatures
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
     propertyData.guarantor1Signature = propertyData.guarantor1Signature.toString();
     propertyData.guarantor2Signature = propertyData.guarantor2Signature.toString();
 
-    // Create an instance of the Property model
     const property = new Property(propertyData);
 
-    // Validate and save the property data
     await property.validate();
     const savedProperty = await property.save();
 
