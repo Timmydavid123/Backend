@@ -55,10 +55,7 @@ router.post('/submit-property-form', upload.array('propertyPictures', 4), async 
     const propertyData = req.body;
     const propertyPicturePaths = req.files.map((file) => {
       try {
-        const uniqueFilename = `${Date.now()}-${file.originalname}`;
-        const filePath = `./uploads/${uniqueFilename}`;
-        fs.renameSync(file.path, filePath);
-        return filePath;
+        return file.path;
       } catch (fileError) {
         console.error('Error handling files:', fileError);
         res.status(500).json({ success: false, error: 'Error handling files', details: fileError.message });
