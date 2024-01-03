@@ -49,13 +49,23 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 
 router.post('/submit-property-form', upload.array('propertyPictures', 4), async (req, res) => {
   try {
+    // Log file paths before moving/renaming
+    console.log('Original File Paths:', req.files.map(file => file.path));
+
     const propertyData = req.body;
     const propertyPicturePaths = req.files.map((file) => {
-      const uniqueFilename = `${Date.now()}-${file.originalname}`;
-      const filePath = `./uploads/${uniqueFilename}`;
-      fs.renameSync(file.path, filePath);
-      return filePath;
+      try {
+        const uniqueFilename = `${Date.now()}-${file.originalname}`;
+        const filePath = `./uploads/${uniqueFilename}`;
+        fs.renameSync(file.path, filePath);
+        return filePath;
+      } catch (fileError) {
+        console.error('Error handling files:', fileError);
+        res.status(500).json({ success: false, error: 'Error handling files', details: fileError.message });
+      }
     });
+
+    console.log('New File Paths:', propertyPicturePaths);
 
     propertyData.propertyPictures = propertyPicturePaths;
     propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
@@ -70,7 +80,7 @@ router.post('/submit-property-form', upload.array('propertyPictures', 4), async 
     res.status(200).json({ success: true, data: savedProperty });
   } catch (error) {
     console.error('Error submitting property form:', error);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'Failed to submit form. Please try again.', details: error.message });
   }
 });
 
