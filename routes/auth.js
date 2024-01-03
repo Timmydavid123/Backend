@@ -49,28 +49,23 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
 
 router.post('/submit-property-form', upload.array('propertyPictures', 4), async (req, res) => {
   try {
-    // Log file paths before moving/renaming
     console.log('Original File Paths:', req.files.map(file => file.path));
 
     const propertyData = req.body;
-    const propertyPicturePaths = req.files.map((file) => {
-      try {
-        return file.path;
-      } catch (fileError) {
-        console.error('Error handling files:', fileError);
-        res.status(500).json({ success: false, error: 'Error handling files', details: fileError.message });
-      }
-    });
+    const propertyPicturePaths = req.files.map(file => file.path);
 
     console.log('New File Paths:', propertyPicturePaths);
 
     propertyData.propertyPictures = propertyPicturePaths;
-    propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
-    propertyData.guarantor1Signature = propertyData.guarantor1Signature.toString();
-    propertyData.guarantor2Signature = propertyData.guarantor2Signature.toString();
+
+    // Remove unnecessary conversion to string
+    // propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
+    // propertyData.guarantor1Signature = propertyData.guarantor1Signature.toString();
+    // propertyData.guarantor2Signature = propertyData.guarantor2Signature.toString();
 
     const property = new Property(propertyData);
 
+    // Validate before saving
     await property.validate();
     const savedProperty = await property.save();
 
