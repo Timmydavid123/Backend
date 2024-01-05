@@ -52,6 +52,14 @@ router.post('/submit-property-form', upload.single('propertyPicture'), async (re
   console.log('Received File:', req.file);
 
   try {
+    if (!req.file) {
+      // Handle the case where no file is uploaded
+      return res.status(400).json({
+        success: false,
+        error: 'No file uploaded',
+      });
+    }
+
     console.log('Original File Path:', req.file.path);
 
     const propertyData = req.body;
