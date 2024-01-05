@@ -14,16 +14,13 @@ const router = express.Router();
 // Set up storage configuration for Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Set the destination folder for storing uploaded files
-    cb(null, 'uploads/'); // Adjust the destination folder path as needed
+     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    // Generate a unique filename by appending the current timestamp to the original filename
-    const uniqueFilename = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueFilename);
+     const uniqueFilename = `${Date.now()}-${file.originalname}`;
+     cb(null, uniqueFilename);
   },
 });
-
 const upload = multer({ storage: storage });
 
 router.use(checkTokenExpiration);
