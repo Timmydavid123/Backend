@@ -47,23 +47,19 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
   res.redirect('/');
 });
 
-router.post('/submit-property-form', upload.array('propertyPictures', 4), async (req, res) => {
+router.post('/submit-property-form', upload.single('propertyPicture'), async (req, res) => {
   console.log('Received Fields:', req.body);
-  console.log('Received Files:', req.files);
+  console.log('Received File:', req.file);
+
   try {
-    console.log('Original File Paths:', req.files.map(file => file.path));
+    console.log('Original File Path:', req.file.path);
 
     const propertyData = req.body;
-    const propertyPicturePaths = req.files.map(file => file.path);
+    const propertyPicturePath = req.file.path;
 
-    console.log('New File Paths:', propertyPicturePaths);
+    console.log('New File Path:', propertyPicturePath);
 
-    propertyData.propertyPictures = propertyPicturePaths;
-
-    // Remove unnecessary conversion to string
-    // propertyData.propertyOwnerSignature = propertyData.propertyOwnerSignature.toString();
-    // propertyData.guarantor1Signature = propertyData.guarantor1Signature.toString();
-    // propertyData.guarantor2Signature = propertyData.guarantor2Signature.toString();
+    propertyData.propertyPicture = propertyPicturePath;
 
     const property = new Property(propertyData);
 
@@ -74,7 +70,11 @@ router.post('/submit-property-form', upload.array('propertyPictures', 4), async 
     res.status(200).json({ success: true, data: savedProperty });
   } catch (error) {
     console.error('Error submitting property form:', error);
-    res.status(500).json({ success: false, error: 'Failed to submit form. Please try again.', details: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to submit form. Please try again.',
+      details: error.message,
+    });
   }
 });
 
