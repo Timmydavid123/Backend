@@ -75,6 +75,10 @@ router.post('/submit-property-form', upload.single('propertyPicture'), async (re
     res.status(200).json({ success: true, data: savedProperty });
   } catch (error) {
     console.error('Error submitting property form:', error);
+
+    // Add more logging to help identify the issue
+    console.error('Error stack:', error.stack);
+
     res.status(500).json({
       success: false,
       error: 'Failed to submit form. Please try again.',
