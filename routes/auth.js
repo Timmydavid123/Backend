@@ -61,6 +61,7 @@ router.post('/submit-property-form', upload.single('propertyPicture'), async (re
 
     const propertyData = req.body;
     const propertyPicturePath = req.file.path;
+    propertyData.propertyPicture = propertyPicturePath;
 
     console.log('New File Path:', propertyPicturePath);
 
