@@ -14,14 +14,20 @@ const router = express.Router();
 // Set up storage configuration for Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-     cb(null, 'uploads/');
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-     const uniqueFilename = `${Date.now()}-${file.originalname}`;
-     cb(null, uniqueFilename);
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueFilename);
   },
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ storage: storage }).fields([
+  { name: 'propertyOwnerSignature', maxCount: 1 },
+  { name: 'guarantor1Signature', maxCount: 1 },
+  { name: 'guarantor2Signature', maxCount: 1 },
+  { name: 'propertyPicture', maxCount: 1 }, // Add this line for property picture
+]);
 
 router.use(checkTokenExpiration);
 
@@ -44,50 +50,62 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
   res.redirect('/');
 });
 
-router.post('/submit-property-form', upload.single('propertyPicture'), async (req, res) => {
-  console.log('Received Fields:', req.body);
-  console.log('Received File:', req.file);
-
-  try {
-    if (!req.file) {
-      // Handle the case where no file is uploaded
+router.post('/submit-property-form', (req, res) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      // Handle the error
       return res.status(400).json({
         success: false,
-        error: 'No file uploaded',
+        error: 'Error uploading file',
       });
     }
 
-    console.log('Original File Path:', req.file.path);
+    try {
+      if (!req.files || Object.keys(req.files).length === 0) {
+        // Handle the case where no file is uploaded
+        console.error('No file uploaded');
+        return res.status(400).json({
+          success: false,
+          error: 'No file uploaded',
+        });
+      }
 
-    const propertyData = req.body;
-    const propertyPicturePath = req.file.path;
-    propertyData.propertyPicture = propertyPicturePath;
+      console.log('Received Fields:', req.body);
+      console.log('Received Files:', req.files);
 
-    console.log('New File Path:', propertyPicturePath);
+      const propertyData = req.body;
+      const propertyOwnerSignaturePath = req.files.propertyOwnerSignature[0].path;
+      const guarantor1SignaturePath = req.files.guarantor1Signature[0].path;
+      const guarantor2SignaturePath = req.files.guarantor2Signature[0].path;
 
-    propertyData.propertyPicture = propertyPicturePath;
+     // Modified code to handle propertyPicture upload more gracefully
+     const propertyPictureFile = req.files.propertyPicture && req.files.propertyPicture[0]; // Retrieve the property picture file
+     propertyData.propertyPicture = propertyPictureFile ? propertyPictureFile.path : ''; // Use path for storage
 
-    const property = new Property(propertyData);
+      propertyData.propertyOwnerSignature = propertyOwnerSignaturePath;
+      propertyData.guarantor1Signature = guarantor1SignaturePath;
+      propertyData.guarantor2Signature = guarantor2SignaturePath;
 
-    // Validate before saving
-    await property.validate();
-    const savedProperty = await property.save();
+      const property = new Property(propertyData);
 
-    res.status(200).json({ success: true, data: savedProperty });
-  } catch (error) {
-    console.error('Error submitting property form:', error);
+      // Validate before saving
+      await property.validate();
+      const savedProperty = await property.save();
 
-    // Add more logging to help identify the issue
-    console.error('Error stack:', error.stack);
+      res.status(200).json({ success: true, data: savedProperty });
+    } catch (error) {
+      console.error('Error processing file upload:', error);
+      console.error('Error submitting property form:', error);
+      console.error('Error stack:', error.stack);
 
-    res.status(500).json({
-      success: false,
-      error: 'Failed to submit form. Please try again.',
-      details: error.message,
-    });
-  }
+      res.status(500).json({
+        success: false,
+        error: 'Failed to submit form. Please try again.',
+        details: error.message,
+      });
+    }
+  });
 });
-
 router.patch('/admin/approve-property/:propertyId', async (req, res) => {
   try {
     const propertyId = req.params.propertyId;
