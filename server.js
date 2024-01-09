@@ -36,7 +36,6 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'build', '404.html'));
 });
 // Middleware
-const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
