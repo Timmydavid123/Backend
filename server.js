@@ -10,6 +10,7 @@ const session = require('express-session');
 const extractUserId = require('./middleware/extractUserId');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth'); 
+const path = require('path');
 const cookieParser = require('cookie-parser');
 const adminRoutes = require('./routes/admin');
 // Generate a secure random string as the session secret key
