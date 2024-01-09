@@ -41,23 +41,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
-const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'https://flexile.vercel.app', 'https://flexileinvestment.com'],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204,
-  allowedHeaders: 'Content-Type, Authorization',
-};
-
 // Use the CORS middleware for all routes
 app.use(cors(corsOptions));
 
 // Add the Cross-Origin-Opener-Policy header here
 app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Access-Control-Allow-Origin', 'https://flexileinvestment.com'); // Add this line
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Add this line
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Add this line
+  res.setHeader('Access-Control-Allow-Origin', 'https://flexileinvestment.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
 
