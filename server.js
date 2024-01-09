@@ -49,9 +49,6 @@ const corsOptions = {
   allowedHeaders: 'Content-Type, Authorization',
 };
 
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
 // Use the CORS middleware for all routes
 app.use(cors(corsOptions));
 
@@ -61,16 +58,14 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(session({
-  secret: sessionSecretKey,
-  resave: true,
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    secure: false, // Set to true if using HTTPS
-    httpOnly: true,
-  },
-}));
+// Using helmet middleware for secure headers
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy(/* your CSP configuration */));
+
+// Initialize Passport and use the express-session middleware with the generated secret key
+app.use(session({ secret: sessionSecretKey, resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
