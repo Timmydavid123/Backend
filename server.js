@@ -55,6 +55,9 @@ app.use(cors(corsOptions));
 // Add the Cross-Origin-Opener-Policy header here
 app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Access-Control-Allow-Origin', 'https://flexileinvestment.com'); // Add this line
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); // Add this line
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Add this line
   next();
 });
 
