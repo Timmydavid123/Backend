@@ -28,7 +28,15 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
     console.error('MongoDB connection error:', error);
   });
 
+  // Serve the React app
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Handle 404 errors
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'build', '404.html'));
+});
 // Middleware
+const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -53,10 +61,24 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(session({
+  secret: sessionSecretKey,
+  resave: true,
+  saveUninitialized: true,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    secure: false, // Set to true if using HTTPS
+    httpOnly: true,
+  },
+}));
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
 // Using helmet middleware for secure headers
 app.use(helmet());
-
+app.use(helmet.contentSecurityPolicy(/* your CSP configuration */));
 // Initialize Passport and use the express-session middleware with the generated secret key
 app.use(session({ secret: sessionSecretKey, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
