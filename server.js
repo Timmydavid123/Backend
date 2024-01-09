@@ -41,6 +41,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
+// Define corsOptions before using it
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://flexile.vercel.app', 'https://flexileinvestment.com'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+  allowedHeaders: 'Content-Type, Authorization',
+};
+
 // Use the CORS middleware for all routes
 app.use(cors(corsOptions));
 
