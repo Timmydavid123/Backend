@@ -40,25 +40,19 @@ app.use((req, res) => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors()); // Use the cors middleware globally
 
 // Define corsOptions before using it
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://flexile.vercel.app', 'https://flexileinvestment.com'],
+  origin: ['https://flexileinvestment.com'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
   allowedHeaders: 'Content-Type, Authorization',
 };
-// Use the CORS middleware for all routes
-    app.use(cors(corsOptions));
 
-if (req.method === 'OPTIONS') {
-  res.setHeader('Access-Control-Allow-Origin', 'https://flexileinvestment.com');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.sendStatus(204); // No content for preflight requests
-  return;
-}
+// Use the CORS middleware for all routes
+app.use(cors(corsOptions));
 
 // Using helmet middleware for secure headers
 app.use(helmet());
