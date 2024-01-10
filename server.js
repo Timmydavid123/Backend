@@ -41,9 +41,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 
-// Use the CORS middleware for all routes
-app.use(cors(corsOptions));
-
 // Define corsOptions before using it
 const corsOptions = {
   origin: ['http://localhost:3000', 'https://flexile.vercel.app', 'https://flexileinvestment.com'],
@@ -52,6 +49,8 @@ const corsOptions = {
   optionsSuccessStatus: 204,
   allowedHeaders: 'Content-Type, Authorization',
 };
+// Use the CORS middleware for all routes
+    app.use(cors(corsOptions));
 
 if (req.method === 'OPTIONS') {
   res.setHeader('Access-Control-Allow-Origin', 'https://flexileinvestment.com');
