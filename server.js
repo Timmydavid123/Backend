@@ -40,7 +40,7 @@ app.use((req, res) => {
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors()); // Use the cors middleware globally
+
 
 // Define corsOptions before using it
 const corsOptions = {
