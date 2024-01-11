@@ -44,15 +44,15 @@ app.use(express.urlencoded({ extended: false }));
 
 // Define corsOptions before using it
 const corsOptions = {
-  origin: ['https://flexileinvestment.com'],
+  origin: '*',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
   allowedHeaders: 'Content-Type, Authorization',
 };
 
-// Use the CORS middleware for all routes
 app.use(cors(corsOptions));
+
 
 // Using helmet middleware for secure headers
 app.use(helmet());
@@ -63,14 +63,14 @@ app.use(session({ secret: sessionSecretKey, resave: true, saveUninitialized: tru
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use((err, req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    res.status(204).end();
-  } else {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
-  }
-});
+// app.use((err, req, res, next) => {
+//   if (req.method === 'OPTIONS') {
+//     res.status(204).end();
+//   } else {
+//     console.error(err.stack);
+//     res.status(500).send('Something went wrong!');
+//   }
+// });
 // Using helmet middleware for secure headers
 app.use(helmet());
 app.use(helmet.contentSecurityPolicy(/* your CSP configuration */));
