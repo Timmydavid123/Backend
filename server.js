@@ -44,19 +44,29 @@ app.use(express.urlencoded({ extended: false }));
 
 // Define corsOptions before using it
 const corsOptions = {
-  origin: '*',
+  origin: 'http://localhost:3000',
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
   allowedHeaders: 'Content-Type, Authorization',
 };
 
+// Handle preflight requests
+app.options('http://localhost:3000', cors(corsOptions));
+
+// Use the CORS middleware for all routes
 app.use(cors(corsOptions));
+
+// Add the Cross-Origin-Opener-Policy header here
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  next();
+});
 
 
 // Using helmet middleware for secure headers
 app.use(helmet());
-app.use(helmet.contentSecurityPolicy(/* your CSP configuration */));
+
 
 // Initialize Passport and use the express-session middleware with the generated secret key
 app.use(session({ secret: sessionSecretKey, resave: true, saveUninitialized: true }));
